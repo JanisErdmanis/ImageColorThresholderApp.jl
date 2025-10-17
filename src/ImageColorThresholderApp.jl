@@ -295,4 +295,25 @@ function image_color_thresholder_app(img::Matrix{Lab{T}}) where {T}
 end
 
 include("precompile.jl")
+
+# Creating a launcher for the application
+using NativeFileDialog
+using FileIO
+using GLMakie
+
+function (@main)(ARGS)
+    
+    file = NativeFileDialog.pick_file(homedir(); filterlist="png;jpg")
+    img = FileIO.load(file)
+    img_rgb = RGB.(img)
+    fig = image_color_thresholder_app(img_rgb)
+
+    display(fig)
+    wait(fig.scene)  # Wait until the window is closed
+
+    return
+end
+
+export main
+
 end
