@@ -13,7 +13,10 @@ PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 
 [compat]
 Aqua = "0.7"
+ColorTypes = "0.12.1"
 FileIO = "1.17.1"
+GLMakie = "0.13.6"
+Makie = "0.24.6"
 NativeFileDialog = "0.2.1"
 PrecompileTools = "1"
 
@@ -23,3 +26,7 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Aqua", "Test"]
+
+[bundle]
+APP_NAME = "ImageColorThresholder"
+APP_DISPLAY_NAME = "ImageColorThresholder"
