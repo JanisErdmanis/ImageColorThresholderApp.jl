@@ -18,12 +18,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: macos-latest
-            os: macos
-            arch: x86_64
-          - runner: macos-latest
-            os: macos
-            arch: aarch64
           - runner: ubuntu-latest
             os: linux
             arch: x86_64
@@ -35,6 +29,7 @@ jobs:
           - runner: windows-2022
             os: windows
             arch: x86_64
+            mesa: true
     
     steps:
       - uses: actions/checkout@v4
@@ -45,15 +40,68 @@ jobs:
 
       - uses: julia-actions/cache@v1
       
+      - name: Install Linux dependencies
+        if: matrix.xvfb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xorg-dev mesa-utils xvfb libgl1 freeglut3-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
+      
+      - name: Install 7zip (Windows)
+        if: matrix.mesa
+        run: choco install 7zip.install
+      
+      - name: Install Mesa3D to System32 (Windows)
+        if: matrix.mesa
+        shell: pwsh
+        run: |
+          Write-Host "Downloading Mesa3D..."
+          curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/24.2.7/mesa3d-24.2.7-release-msvc.7z
+          
+          Write-Host "Extracting Mesa3D..."
+          & "C:\Program Files\7-Zip\7z.exe" x mesa.7z -o"$env:RUNNER_TEMP\mesa"
+          
+          Write-Host "Installing Mesa DLLs to System32..."
+          Copy-Item "$env:RUNNER_TEMP\mesa\x64\opengl32.dll" "C:\Windows\System32\" -Force
+          Copy-Item "$env:RUNNER_TEMP\mesa\x64\libglapi.dll" "C:\Windows\System32\" -Force
+          
+          Write-Host "Verifying installation..."
+          if (Test-Path "C:\Windows\System32\opengl32.dll") {
+            Write-Host "✓ opengl32.dll installed successfully"
+          }
+          if (Test-Path "C:\Windows\System32\libglapi.dll") {
+            Write-Host "✓ libglapi.dll installed successfully"
+          }
+          
+          Write-Host "Mesa3D installation complete!"
+      
       - name: Install dependencies
         run: julia --project=meta -e 'using Pkg; Pkg.instantiate()'
 
-      - name: Build
+      - name: Build (Linux with xvfb)
+        if: matrix.xvfb
         env: 
           MACOS_PFX_PASSWORD: ${{ secrets.MACOS_PFX_PASSWORD }}
           WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
         run: |
-          ${{ matrix.xvfb && 'xvfb-run -s ''-screen 0 1024x768x24''' || '' }} julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
+          xvfb-run -s '-screen 0 1024x768x24' julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
+
+      - name: Build (Windows with Mesa)
+        if: matrix.mesa
+        env: 
+          MACOS_PFX_PASSWORD: ${{ secrets.MACOS_PFX_PASSWORD }}
+          WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
+          LIBGL_ALWAYS_SOFTWARE: 1
+        shell: pwsh
+        run: |
+          julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
+      
+      - name: Build (macOS)
+        if: matrix.os == 'macos'
+        env: 
+          MACOS_PFX_PASSWORD: ${{ secrets.MACOS_PFX_PASSWORD }}
+          WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
+        run: |
+          julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
       
       - uses: actions/upload-artifact@v4
         with:
