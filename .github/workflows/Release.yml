@@ -18,6 +18,12 @@ jobs:
     strategy:
       matrix:
         include:
+          - runner: macos-latest
+            os: macos
+            arch: x86_64
+          - runner: macos-latest
+            os: macos
+            arch: aarch64
           - runner: ubuntu-latest
             os: linux
             arch: x86_64
@@ -52,11 +58,10 @@ jobs:
       
       - name: Install Mesa3D (Windows)
         if: matrix.mesa
-        shell: cmd
+        shell: pwsh
         run: |
           curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/24.2.7/mesa3d-24.2.7-release-msvc.7z
-          "C:\Program Files\7-Zip\7z.exe" x mesa.7z -o%RUNNER_TEMP%\mesa
-          echo %RUNNER_TEMP%\mesa\x64>> %GITHUB_PATH%
+          & "C:\Program Files\7-Zip\7z.exe" x mesa.7z -o"$env:RUNNER_TEMP\mesa"
       
       - name: Verify Mesa installation (Windows)
         if: matrix.mesa
@@ -82,9 +87,9 @@ jobs:
           MACOS_PFX_PASSWORD: ${{ secrets.MACOS_PFX_PASSWORD }}
           WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
           LIBGL_ALWAYS_SOFTWARE: 1
+          PATH: ${{ runner.temp }}\mesa\x64;${{ env.PATH }}
         shell: pwsh
         run: |
-          $env:PATH = "$env:RUNNER_TEMP\mesa\x64;$env:PATH"
           julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
       
       - name: Build (macOS)
