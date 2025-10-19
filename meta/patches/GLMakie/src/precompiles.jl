@@ -1,4 +1,4 @@
-# using PrecompileTools
+using PrecompileTools
 
 # macro compile(block)
 #     return quote
@@ -57,21 +57,21 @@
 #     nothing
 # end
 
-# precompile(Screen, (Scene, ScreenConfig))
-# precompile(GLFramebuffer, (NTuple{2, Int},))
-# precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{Float32}))
-# precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{RGBAf}))
-# precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{RGBf}))
-# precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{RGBA{N0f8}}))
-# precompile(
-#     glTexImage,
-#     (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{GLAbstraction.DepthStencil_24_8})
-# )
-# precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{Vec{2, GLuint}}))
-# precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{RGBA{Float16}}))
-# precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{N0f8}))
-# precompile(setindex!, (GLMakie.GLAbstraction.Texture{Float16, 2}, Matrix{Float32}, Rect2{Int32}))
-# precompile(getindex, (Makie.Text{Tuple{Vector{Point{2, Float32}}}}, Symbol))
-# precompile(getproperty, (Makie.Text{Tuple{Vector{Point{2, Float32}}}}, Symbol))
-# precompile(plot!, (Makie.Text{Tuple{Vector{Point{2, Float32}}}},))
-# precompile(Base.getindex, (Attributes, Symbol))
+precompile(Screen, (Scene, ScreenConfig))
+precompile(GLFramebuffer, (NTuple{2, Int},))
+precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{Float32}))
+precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{RGBAf}))
+precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{RGBf}))
+precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{RGBA{N0f8}}))
+precompile(
+    glTexImage,
+    (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{GLAbstraction.DepthStencil_24_8})
+)
+precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{Vec{2, GLuint}}))
+precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{RGBA{Float16}}))
+precompile(glTexImage, (GLenum, Int, GLenum, Int, Int, Int, GLenum, GLenum, Ptr{N0f8}))
+precompile(setindex!, (GLMakie.GLAbstraction.Texture{Float16, 2}, Matrix{Float32}, Rect2{Int32}))
+precompile(getindex, (Makie.Text{Tuple{Vector{Point{2, Float32}}}}, Symbol))
+precompile(getproperty, (Makie.Text{Tuple{Vector{Point{2, Float32}}}}, Symbol))
+precompile(plot!, (Makie.Text{Tuple{Vector{Point{2, Float32}}}},))
+precompile(Base.getindex, (Attributes, Symbol))
