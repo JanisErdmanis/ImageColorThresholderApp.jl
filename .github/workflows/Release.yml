@@ -18,6 +18,12 @@ jobs:
     strategy:
       matrix:
         include:
+          - runner: macos-latest
+            os: macos
+            arch: x86_64
+          - runner: macos-latest
+            os: macos
+            arch: aarch64
           - runner: ubuntu-latest
             os: linux
             arch: x86_64
@@ -29,8 +35,7 @@ jobs:
           - runner: windows-2022
             os: windows
             arch: x86_64
-            mesa: true
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -40,59 +45,15 @@ jobs:
 
       - uses: julia-actions/cache@v1
       
-      - name: Install Linux dependencies
-        if: matrix.xvfb
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xorg-dev mesa-utils xvfb libgl1 freeglut3-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev
-      
-      - name: Install 7zip (Windows)
-        if: matrix.mesa
-        run: choco install 7zip.install
-      
-      - name: Install Mesa3D (Windows)
-        if: matrix.mesa
-        shell: pwsh
-        run: |
-          curl.exe -L --output mesa.7z --url https://github.com/pal1000/mesa-dist-win/releases/download/24.2.7/mesa3d-24.2.7-release-msvc.7z
-          & "C:\Program Files\7-Zip\7z.exe" x mesa.7z -o"$env:RUNNER_TEMP\mesa"
-      
-      - name: Verify Mesa installation (Windows)
-        if: matrix.mesa
-        shell: pwsh
-        run: |
-          Write-Host "Mesa DLLs location: $env:RUNNER_TEMP\mesa\x64"
-          Get-ChildItem "$env:RUNNER_TEMP\mesa\x64" | Where-Object { $_.Extension -eq ".dll" }
-      
       - name: Install dependencies
         run: julia --project=meta -e 'using Pkg; Pkg.instantiate()'
 
-      - name: Build (Linux with xvfb)
-        if: matrix.xvfb
+      - name: Build
         env: 
           MACOS_PFX_PASSWORD: ${{ secrets.MACOS_PFX_PASSWORD }}
           WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
         run: |
-          xvfb-run -s '-screen 0 1024x768x24' julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
-
-      - name: Build (Windows with Mesa)
-        if: matrix.mesa
-        env: 
-          MACOS_PFX_PASSWORD: ${{ secrets.MACOS_PFX_PASSWORD }}
-          WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
-          LIBGL_ALWAYS_SOFTWARE: 1
-          PATH: ${{ runner.temp }}\mesa\x64;${{ env.PATH }}
-        shell: pwsh
-        run: |
-          julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
-      
-      - name: Build (macOS)
-        if: matrix.os == 'macos'
-        env: 
-          MACOS_PFX_PASSWORD: ${{ secrets.MACOS_PFX_PASSWORD }}
-          WINDOWS_PFX_PASSWORD: ${{ secrets.WINDOWS_PFX_PASSWORD }}
-        run: |
-          julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
+          ${{ matrix.xvfb && 'xvfb-run -s ''-screen 0 1024x768x24''' || '' }} julia --project=meta meta/build.jl --target-platform=${{ matrix.os }} --target-arch=${{ matrix.arch }} --build-dir=build
       
       - uses: actions/upload-artifact@v4
         with:
