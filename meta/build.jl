@@ -21,7 +21,7 @@ if :linux in target_platforms
 end
 
 if :windows in target_platforms
-    AppBundler.build_app(Windows(target_arch), APP_DIR, "$build_dir/$target_name.msix"; precompile, incremental, adhoc_signing)
+    AppBundler.build_app(Windows(target_arch), APP_DIR, "$build_dir/$target_name.msix"; precompile, incremental, adhoc_signing, windowed=false)
 end
 
 if :macos in target_platforms
